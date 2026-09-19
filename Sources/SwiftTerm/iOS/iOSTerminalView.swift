@@ -3303,7 +3303,13 @@ open class TerminalView: UIScrollView, UITextInputTraits, UIKeyInput, UIScrollVi
                     // Meta prefixes the Control-transformed character for a
                     // combined chord, just as in the enhanced keyboard encoder.
                     if key.modifierFlags.contains(.control) {
-                        data = .bytes([0x1b] + applyControlToEventCharacters(key.charactersIgnoringModifiers))
+                        let controlBytes = applyControlToEventCharacters(key.charactersIgnoringModifiers)
+                        if controlBytes.isEmpty {
+                            // Keep the legacy Meta input for keys with no Control mapping.
+                            data = .text("\u{1b}\(key.charactersIgnoringModifiers)")
+                        } else {
+                            data = .bytes([0x1b] + controlBytes)
+                        }
                     } else {
                         data = .text("\u{1b}\(key.charactersIgnoringModifiers)")
                     }
